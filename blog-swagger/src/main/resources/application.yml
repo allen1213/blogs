@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: blog-swagger
+
+server:
+  port: 8201
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8001/eureka

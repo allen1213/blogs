@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: blog-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          # 服务名小写
+          lower-case-service-id: true
+      routes:
+        - id: blog-service
+          # lb代表从注册中心获取服务，且已负载均衡方式转发
+          uri: lb://blog-service
+          predicates:
+            - Path=/service/**
+          # 加上StripPrefix=1，否则转发到后端服务时会带上consumer前缀
+          filters:
+#            - SwaggerHeaderFilter
+            - StripPrefix=1
+#            - AddResponseHeader=X-Response-Default-Foo, Default-Bar
+        - id: blog-swagger
+          uri: lb://blog-swagger
+          predicates:
+            - Path=/swagger/**
+          filters:
+#            - SwaggerHeaderFilter
+            - StripPrefix=1
+        # 路由到百度页面
+        - id: baidu_route
+          uri: http://www.baidu.com
+          predicates:
+            - Path=/baidu/**
+          filters:
+#            - SwaggerHeaderFilter
+            - StripPrefix=1
+
+server:
+  port: 8101
+
+eureka:
+  instance:
+    # 使用 ip 代替实例名
+    prefer-ip-address: true
+    # 实例的主机名
+    hostname: ${spring.cloud.client.ip-address}
+    # 实例的 ID 规则
+    instance-id: ${spring.cloud.client.ip-address}:${spring.application.name}:${server.port}
+  client:
+    service-url:
+      # 一定要使用驼峰命名，用横线命名的方式会找不到注册中心
+      defaultZone: http://127.0.0.1:8001/eureka
+
